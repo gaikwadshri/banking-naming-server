@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: eureka-server   # Unique service name for the registry
+
+server:
+  port: 7000              # Port where Eureka Server will run
+  shutdown: graceful      # Allows graceful shutdown during deployment
+
+eureka:
+  instance:
+    hostname: ${HOSTNAME:localhost}   # Hostname of the server (useful in Docker/K8s)
+    prefer-ip-address: true           # Clients will use IP instead of hostname
+
+  client:
+    register-with-eureka: false       # Eureka Server should NOT register itself
+    fetch-registry: false             # Server does NOT fetch registry (only clients do)
+
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+      # Base URL for Eureka registry access
+
+  server:
+    enable-self-preservation: true
+    # Prevents accidental removal of services during network issues
+
+    eviction-interval-timer-in-ms: 60000
+    # Interval to remove expired service instances (60 seconds)
+
+    renewal-percent-threshold: 0.85
+    # Percentage of heartbeats expected before triggering self-preservation
+
+    response-cache-update-interval-ms: 30000
+    # Cache refresh interval for registry responses
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+        # Exposes monitoring endpoints for Prometheus / Grafana
+
+  endpoint:
+    health:
+      show-details: always
+      # Show detailed health info (useful for monitoring tools)
+
+logging:
+  level:
+    com.netflix.eureka: INFO
+    com.netflix.discovery: INFO
+    org.springframework.cloud: INFO
+    # Recommended logging level for production debugging
